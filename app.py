@@ -3,7 +3,7 @@ from google import genai
 import os
 from dotenv import load_dotenv
 
-# Load environment variables (.env for local development)
+# Load environment variables
 
 load_dotenv()
 
@@ -18,11 +18,11 @@ except Exception:
 st.error("⚠️ Gemini API key not configured.")
 st.stop()
 
-# Initialize Gemini Client
+# Initialize Gemini client
 
 client = genai.Client(api_key=api_key)
 
-# Page Configuration
+# Streamlit page settings
 
 st.set_page_config(
 page_title="AI-Powered Study Buddy",
@@ -37,89 +37,75 @@ st.write(
 "Explain concepts, summarize notes, and generate quizzes using Google Gemini AI."
 )
 
-# Sidebar Options
+# Sidebar
 
 st.sidebar.header("Options")
-
 mode = st.sidebar.radio(
 "Choose Task:",
 ["Explain Concept", "Summarize Notes", "Generate Quiz"]
 )
 
-# User Input
+# User input
 
 text_input = st.text_area(
 "✏️ Enter your topic, notes, or text:",
 height=200
 )
 
-# Generate Button
+# Generate button
 
 if st.button("🚀 Generate Result"):
 
 ```
 if not text_input.strip():
     st.warning("Please enter some text first!")
-    st.stop()
-
-# Prompt Selection
-if mode == "Explain Concept":
-    prompt = f"""
-```
-
-Explain the following concept clearly and simply for a student:
-
-{text_input}
-"""
-
-```
-elif mode == "Summarize Notes":
-    prompt = f"""
-```
-
-Summarize the following notes into key points and provide a short summary:
-
-{text_input}
-"""
-
-```
 else:
-    prompt = f"""
-```
 
-Generate 5 quiz questions with answers based on the following content:
-
-{text_input}
-"""
-
-```
-try:
-    with st.spinner("Generating response..."):
-
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt
+    if mode == "Explain Concept":
+        prompt = (
+            "Explain the following concept clearly and simply for a student:\n\n"
+            + text_input
         )
 
-        st.success("✅ Done!")
-        st.markdown(response.text)
-
-except Exception as e:
-
-    error_msg = str(e)
-
-    if "429" in error_msg:
-        st.error(
-            "⚠️ Gemini API quota exceeded. Please try again later or use a new API key."
-        )
-
-    elif "503" in error_msg:
-        st.error(
-            "⚠️ Gemini service is currently busy. Please try again in a few minutes."
+    elif mode == "Summarize Notes":
+        prompt = (
+            "Summarize the following notes into key points and provide a short summary:\n\n"
+            + text_input
         )
 
     else:
-        st.error(f"❌ Error: {e}")
+        prompt = (
+            "Generate 5 quiz questions with answers based on the following content:\n\n"
+            + text_input
+        )
+
+    try:
+        with st.spinner("Generating response..."):
+
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
+
+            st.success("✅ Done!")
+            st.markdown(response.text)
+
+    except Exception as e:
+
+        error_msg = str(e)
+
+        if "429" in error_msg:
+            st.error(
+                "⚠️ Gemini API quota exceeded. Please try again later."
+            )
+
+        elif "503" in error_msg:
+            st.error(
+                "⚠️ Gemini service is busy. Please try again in a few minutes."
+            )
+
+        else:
+            st.error(f"❌ Error: {e}")
 ```
 
 # Footer
