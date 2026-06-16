@@ -12,10 +12,10 @@ load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 
 if not api_key:
-try:
-api_key = st.secrets["GEMINI_API_KEY"]
-except Exception:
-st.error("⚠️ Gemini API key not configured.")
+    try:
+        api_key = st.secrets["GEMINI_API_KEY"]
+    except Exception:
+        st.error("⚠️ Gemini API key not configured")
 st.stop()
 
 # Initialize Gemini client
